@@ -1,5 +1,5 @@
 ---
-title: "文字列操作を行う問題の具体的な処理を細かいところまで文法解説"
+title: "Goで文字列操作を行う際の具体的な処理を細かいところまで追ってみる"
 emoji: "😽"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["go", "golang"] # タグ名
@@ -11,13 +11,16 @@ published: false # 公開設定
 とある問題集で以下のような問題がありました。
 
 文章中にアルファベット大文字または数字から始まる単語が何種類あるか数えてください。
+
 ただし単語の個数なので重複はカウントしません。
 
-入力は標準入力から取得して、最後に出力します
+入力は標準入力から取得して、最後に出力します。
 
 ex) input
 
 `Favorite food is yakiniku. Age is 25 years old. Favorite hobby is coding.`
+
+この問題を解く際に学んだことが沢山あったので、まとめました。
 
 ## 最初に考えたこと
 
@@ -171,6 +174,7 @@ regex.MatchString()で true であれば大文字 or 数字 としてカウン�
 ## 全体のコード
 
 ```go
+
 package main
 
 import (
