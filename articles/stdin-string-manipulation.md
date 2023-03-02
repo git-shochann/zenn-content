@@ -66,6 +66,108 @@ scanner.Scan()は、実際の標準入力からデータを読み取り、その
 
 scanner.Scan()で scanner 構造体の token フィールドを読み取り、読み込んだトークンを文字列として返します。
 
+## 実際に処理する部分
+
+```go
+func Solution(str string) int {
+
+    slice := strings.Split(str, " ")
+    uniqueSlice := DeleteDuplicate(slice) // 重複の削除
+    for _, v := range uniqueSlice {
+        // [M3 2000 sho tsuboya]
+        initial := v[0:1]
+    ok := CheckRegex(initial)
+    if ok {
+        count++
+    }
+    }
+    return count
+}
+```
+
+`slice := strings.Split(str, " ")`
+ここではまず、1 つ 1 つの単語にアクセスするため、長"い 1 つの文字列を空白単位で Go のスライスに変換します。
+
+上記の変数 slice は以下のような値を持っています。
+`["Favorite" "food" "is" "yakiniku." "Age" "is" "25" "years" "old." "Favorite" "hobby" "is" "coding."]`
+
+その後、重複の関数が呼び出されます。
+
+```go
+
+func DeleteDuplicate(strings []string) []string {
+    var unique []string
+    m := map[string]bool{}
+    for _, v := range strings {
+    if _, ok := m[v]; !ok {
+        m[v] = true
+        unique = append(unique, v)
+    }
+    return unique
+}
+
+```
+
+まず重複を除いたスライスを新しく作成したいので`var unique []string`と宣言します。
+
+ここでのポイントはどう重複しているかどうかを判定するかということです。
+`m := map[string]bool{}`という変数を用意して、こちらを使います。
+まず map 型の性質として、同じキーが保存されることはありません。
+
+```go
+    m := make(map[string]int)
+    m.key1 = 1
+    m.key2 = 2
+    m.key1 = 5 // 上書きする
+
+    fmt.Println(m)
+    // -> [key1: 5, key2: 2]
+```
+
+空白で区切られた文字列のスライスをそれぞれアクセスしていって、重複がどうかを判定します。
+m[v] -> m["Favorite"] とキーにアクセスし、map のバリューが true か false で判定します。
+要するに true であれば既にキーは存在しているということになります。
+上記の操作を単語分繰り返し重複を除いたスライスを 戻り値として返します。
+
+```go
+
+func Solution(str string) int {
+
+    slice := strings.Split(str, " ")
+    uniqueSlice := DeleteDuplicate(slice) // 重複の削除
+
+    // ここまでOK
+
+    for _, v := range uniqueSlice {
+        // [M3 2000 sho tsuboya]
+        initial := v[0:1]
+    ok := CheckRegex(initial)
+    if ok {
+        count++
+    }
+    }
+    return count
+}
+
+```
+
+さらに重複を除いたスライスを for range で回して、v[0:1]として頭文字にアクセスします。
+そして CheckRegex()として関数を用意します。
+
+```go
+
+regex := regexp.MustCompile(`[A-Z0-9]`) // 準備
+
+func CheckRegex(s string) bool {
+    ok := regex.MatchString(s)  // 判定
+    return ok
+}
+
+```
+
+ここで判定を行います。尚 `regex := regexp.MustCompile(`[A-Z0-9]`)` は一度のみの実行でいいので CheckRegex()外で宣言しています。
+regex.MatchString()で true であれば大文字 or 数字 としてカウントして最後に出力して終了です。
+
 ## 全体のコード
 
 ```go
@@ -81,47 +183,48 @@ import (
 
 var count int
 
-// アルファベット多文字 or 数字から始まる単語が何種類あるか
 func Solution(str string) int {
 
     slice := strings.Split(str, " ")
+    fmt.Printf("slice: %v\n", slice)
     uniqueSlice := DeleteDuplicate(slice) // 重複の削除
+    fmt.Printf("uniqueSlice: %v\n", uniqueSlice)
     for _, v := range uniqueSlice {
         // [M3 2000 sho tsuboya]
         initial := v[0:1]
-    ok := CheckRegex(initial)
-    if ok {
-        count++
-    }
+        ok := CheckRegex(initial)
+        if ok {
+            count++
+        }
     }
     return count
 }
 
+// [M3 2000 sho tsuboya M3]
 func DeleteDuplicate(strings []string) []string {
+    // m[""]false が初期化した際の型
+    m := make(map[string]bool)
+
+    // 一応map[string]struct{}{}の方がいいかもしれない 値にアクセスしなくてもいいので
+    // 詳細は # other_solution.goを参照
+
     var unique []string
-    encounter := map[string]int{}
     for _, v := range strings {
-    if _, ok := encounter[v]; !ok {
-        encounter[v] = 1
-        unique = append(unique, v)
-    } else {
-        encounter[v]++
-    }
+        // m[v]がtrueでなければ = まだそのキーはないということ
+        if _, ok := m[v]; !ok {
+            m[v] = true
+            unique = append(unique, v)
+        }
     }
     return unique
+
 }
+
+var regex = regexp.MustCompile(`[A-Z0-9]`) // 準備
 
 func CheckRegex(s string) bool {
-    regex := regexp.MustCompile(`[A-Z0-9]`) // 準備
-    ok := regex.MatchString(s)              // 判定
+    ok := regex.MatchString(s) // 判定
     return ok
-}
-
-func main() {
-    scanner := bufio.NewScanner(os.Stdin)
-    scanner.Scan()
-    text := scanner.Text()
-    fmt.Printf("Solution(text): %v\n", Solution(text))
 }
 
 ```
