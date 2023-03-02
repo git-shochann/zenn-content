@@ -5,3 +5,5 @@ type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["go"] # タグ名
 published: false # 公開設定
 ---
+
+test
