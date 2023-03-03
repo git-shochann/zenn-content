@@ -48,22 +48,23 @@ func main() {
 Scanner 型は、標準入力やファイルからのデータの読み込みや、文字列を指定の区切りで分割する機能を提供してくれます。
 引数には io.Reader 型 => io.Reader interface は、読み込み可能なデータを表現するためのインターフェースを提供します。
 なので読み取り可能なデータを引数にとってあげます。
-ここで設定する os.Stdin は、標準入力を表す os.File 型のオブジェクトであり、`Stdin = NewFile(uintptr(syscall.Stdin), "/dev/stdin")`
+ここで設定する os.Stdin は、標準入力を表す os.File 型のオブジェクトであり、
+`Stdin = NewFile(uintptr(syscall.Stdin), "/dev/stdin")`
+`func NewFile(fd uintptr, name string) *File`です。
 
 bufio.NewScanner()に渡すことで、標準入力から読み込みを行うよと最初に設定します。
 
 - オブジェクト
-  「Scanner 型のオブジェクトを作成する」という表現において、「オブジェクト」とは、プログラミングにおける概念の 1 つであり、変数や関数、構造体などの実体のこと
-  要するに、構造体のフィールド等を埋める作業を行い、実体を作成するということ
+  「Scanner 型のオブジェクトを作成する」という表現において、この「オブジェクト」とは変数や関数、構造体などの実体のことです。
+  要するに、構造体のフィールド等を埋める作業を行い、実体を作成するということになります。
 
 `scanner.Scan()`
 
-scanner.Scan()は、実際の標準入力からデータを読み取り、そのデータを空白文字で区切って 1 つのトークンにする。
+scanner.Scan()は、実際の標準入力からデータを読み取り、そのデータを空白文字で区切って 1 つのトークンとします。
 
 そのトークンは scanner オブジェクトの token フィールドに一時的に保持します。
-例えば、scanner.Scan()がまた次に呼ばれると、新しいトークンを読み取って、token フィールドを上書きします。
 
-構造体のフィールドにトークンとして分割して保存するだけなので、特に戻り値の利用はない処理になります。
+構造体のフィールドにトークンとして保存するだけなので、特に戻り値の利用はない処理になります。
 
 `text := scanner.Text()`
 
@@ -89,26 +90,26 @@ func Solution(str string) int {
 ```
 
 `slice := strings.Split(str, " ")`
-ここではまず、1 つ 1 つの単語にアクセスするため、長"い 1 つの文字列を空白単位で Go のスライスに変換します。
+ここではまず、1 つ 1 つの単語にアクセスするため、長い 1 つの文字列を空白単位で Go のスライスに変換します。
 
-上記の変数 slice は以下のような値を持っています。
+その結果の変数 slice は以下のような値を持っています。
+
 `["Favorite" "food" "is" "yakiniku." "Age" "is" "25" "years" "old." "Favorite" "hobby" "is" "coding."]`
 
-その後、重複の関数が呼び出されます。
+その後、重複を削除する関数が呼び出されます。
 
 ```go
-
 func DeleteDuplicate(strings []string) []string {
     var unique []string
     m := map[string]bool{}
     for _, v := range strings {
-    if _, ok := m[v]; !ok {
-        m[v] = true
-        unique = append(unique, v)
+        if _, ok := m[v]; !ok {
+            m[v] = true
+            unique = append(unique, v)
+        }
     }
     return unique
 }
-
 ```
 
 まず重複を除いたスライスを新しく作成したいので`var unique []string`と宣言します。
@@ -130,10 +131,9 @@ func DeleteDuplicate(strings []string) []string {
 空白で区切られた文字列のスライスをそれぞれアクセスしていって、重複がどうかを判定します。
 m[v] -> m["Favorite"] とキーにアクセスし、map のバリューが true か false で判定します。
 要するに true であれば既にキーは存在しているということになります。
-上記の操作を単語分繰り返し重複を除いたスライスを 戻り値として返します。
+このように単語分繰り返していき、重複を除いたスライスを 戻り値として返します。
 
 ```go
-
 func Solution(str string) int {
 
     slice := strings.Split(str, " ")
@@ -151,21 +151,18 @@ func Solution(str string) int {
     }
     return count
 }
-
 ```
 
 さらに重複を除いたスライスを for range で回して、v[0:1]として頭文字にアクセスします。
 そして CheckRegex()として関数を用意します。
 
 ```go
-
 regex := regexp.MustCompile(`[A-Z0-9]`) // 準備
 
 func CheckRegex(s string) bool {
     ok := regex.MatchString(s)  // 判定
     return ok
 }
-
 ```
 
 ここで判定を行います。尚 `regex := regexp.MustCompile(`[A-Z0-9]`)` は一度のみの実行でいいので CheckRegex()外で宣言しています。
@@ -174,7 +171,6 @@ regex.MatchString()で true であれば大文字 or 数字 としてカウン�
 ## 全体のコード
 
 ```go
-
 package main
 
 import (
@@ -230,5 +226,89 @@ func CheckRegex(s string) bool {
     ok := regex.MatchString(s) // 判定
     return ok
 }
+```
 
+## 上記の改善点
+
+一応上記でのコードでも動くのですが、
+
+string.Split()でも全てを読み込むとなると、テキストファイルのサイズが大きいと変数の容量も増加し、
+変数のサイズが大きくなるとメモリ確保やコピーなどに時間がかかります。
+
+今回全てのテキスト情報を保持しなくても、文字列をスペース等がくるまで順番に読み取って処理を行い、
+単語の重複チェックを行なっていくことで既に処理した文字列を破棄することが出来るようなロジックでも書くことが出来ました。
+
+## 全体のコード
+
+```go
+
+func otherSolution() {
+    scanner := bufio.NewScanner(os.Stdin)
+
+    words := map[string]struct{}{}
+    for scanner.Scan() {
+        word := scanner.Text()
+        initial := word[0]
+        if 'A' <= intial && 'Z' <= initial || '0' <= initial && '9' {
+            words[word] = struct{}{}
+        }
+    }
+}
+
+
+
+```
+
+最初に`words := map[string]struct{}{}`とありますが、こちらも重複をチェックするために用意しています。後ほど説明します。
+
+まず、scanner.Scan()は標準入力空白で区切って(空白以外の区切りにも出来るがデフォルトは空白)、データを空白文字で区切って 1 つのトークンとします。
+そのトークンは scanner オブジェクトの token フィールドに一時的に保持します。なのでこれを利用して、1 つ 1 つ文字を見ていけばいいだけです。
+そして`initial := word[0]` こちらで単語の頭文字にアクセスします。
+
+```go
+    if 'A' <= intial && 'Z' <= initial || '0' <= initial && '9' <= initial {
+        words[word] = struct{}{}
+    }
+```
+
+上記のコードが何かというと、
+Go では文字列リテラルをダブルクオテーションで囲みます。一方シングルクオテーションで囲むのは、1 つの文字だけです。
+シングルクオテーションとして囲んだ文字は`rune` `int32`として扱われます。
+というのも文字コード(=unicode)として表現されます。
+
+文字コード(=unicode)は`int32`であるので、比較演算子を用いて大小関係を比較できます。
+
+例えば、
+
+A の文字コード(=Unicode): 65
+
+B の文字コード(=Unicode): 66
+
+C の文字コード(=Unicode): 67
+
+であり、initial も 1 文字なので`rune`同士で比較します。
+
+そして条件が true であれば、以下のようになります。
+
+`words[word] = struct{}{}`
+
+まず解説すると、
+
+`words := map[string]struct{}{}`
+
+まず map のキーに string、バリューに空の構造体型 struct{}で{}とすることでその値は空と表現出来ます。
+
+こちらでも重複を判定することが出来ます。特に今回の場合バリューにアクセスする必要が別にないので
+キーだけで判断しようということです。
+これにより、map のキーの存在を調べるときにメモリ使用量が大幅に削減されるそうです。
+
+```go
+    words := map[string]struct{}{}
+
+    words["key1"] = struct{}{}
+    words["key2"] = struct{}{}
+    words["key1"] = struct{}{}
+
+    fmt.Println(words)
+    // -> map[key1:{} key2:{}]
 ```
