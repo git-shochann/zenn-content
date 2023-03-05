@@ -245,6 +245,17 @@ string.Split()でも全てを読み込むとなると、テキストファイル
 func otherSolution() {
     scanner := bufio.NewScanner(os.Stdin)
 
+    // どのように区切るかの設定を行う
+    scanner.Split(func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+        // 空白で区切る
+        for i := 0; i < len(data); i++ {
+            if data[i] == ' ' || data[i] == '.' {
+                return i + 1, data[:i], nil
+            }
+        }
+        return 0, data, bufio.ErrFinalToken
+    })
+
     words := map[string]struct{}{}
     for scanner.Scan() {
         word := scanner.Text()
