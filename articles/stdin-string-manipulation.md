@@ -24,11 +24,11 @@ ex) input
 
 ## 最初に考えたこと
 
-1. まずは空白で文字を区切って新しくスライスを作成する
+1. まずは空白とピリオドで文字を区切って新しくスライスを作成する
 2. 重複を判定する関数を用意して、重複を取り除いた新しいスライスを作成する
 3. スライスを range で回していき、文字を取得して、大文字か小文字か判定する
 
-このように最初に整理して、ロジックを考えました。
+このように最初に整理して考えました。
 
 最初に全てのコードを提示しても分かり辛いので、main 関数から最後まで切り分けて解説します。
 
@@ -75,7 +75,9 @@ scanner.Scan()で scanner 構造体の token フィールドを読み取り、�
 ```go
 func Solution(str string) int {
 
-    slice := strings.Split(str, " ")
+    slice := strings.FieldsFunc(str, func(r rune) bool {
+        return unicode.IsSpace(r) || r == '.'
+    })
     uniqueSlice := DeleteDuplicate(slice) // 重複の削除
     for _, v := range uniqueSlice {
         // [M3 2000 sho tsuboya]
@@ -89,12 +91,21 @@ func Solution(str string) int {
 }
 ```
 
-`slice := strings.Split(str, " ")`
-ここではまず、1 つ 1 つの単語にアクセスするため、長い 1 つの文字列を空白単位で Go のスライスに変換します。
+```go
+    slice := strings.FieldsFunc(str, func(r rune) bool {
+        return unicode.IsSpace(r) || r == '.'
+    })
+```
+
+`func FieldsFunc(s string, f func(rune) bool) []string {}`
+
+ここではまず 1 つ 1 つの単語にアクセスして、空白とピリオドで分割するように設定します。
+無名関数が引数の場合はその通りにシグニチャを用意すれば OK です。
+戻り値として空白とピリオドを除いたスライスを返します。
 
 その結果の変数 slice は以下のような値を持っています。
 
-`["Favorite" "food" "is" "yakiniku." "Age" "is" "25" "years" "old." "Favorite" "hobby" "is" "coding."]`
+`["Favorite" "food" "is" "yakiniku" "Age" "is" "25" "years" "old" "Favorite" "hobby" "is" "coding"]`
 
 その後、重複を削除する関数が呼び出されます。
 
@@ -168,7 +179,7 @@ func CheckRegex(s string) bool {
 ここで判定を行います。尚 `regex := regexp.MustCompile(`[A-Z0-9]`)` は一度のみの実行でいいので CheckRegex()外で宣言しています。
 regex.MatchString()で true であれば大文字 or 数字 としてカウントして最後に出力して終了です。
 
-## 全体のコード
+### 全体のコード
 
 ```go
 package main
@@ -228,17 +239,122 @@ func CheckRegex(s string) bool {
 }
 ```
 
-## 上記の改善点
+### 上記の改善点
 
 一応上記でのコードでも動くのですが、
 
 string.Split()でも全てを読み込むとなると、テキストファイルのサイズが大きいと変数の容量も増加し、
 変数のサイズが大きくなるとメモリ確保やコピーなどに時間がかかります。
 
-今回全てのテキスト情報を保持しなくても、文字列をスペース等がくるまで順番に読み取って処理を行い、
+今回全てのテキスト情報を保持しなくても、文字列をスペース等が来るまで順番に読み取って処理を行い、
 単語の重複チェックを行なっていくことで既に処理した文字列を破棄することが出来るようなロジックでも書くことが出来ました。
 
-## 全体のコード
+### 方法 2
+
+```go
+    scanner := bufio.NewScanner(os.Stdin)
+
+    // どのように区切るかの設定を行う
+    scanner.Split(func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+        // 空白で区切る
+        for i := 0; i < len(data); i++ {
+            if data[i] == ' ' || data[i] == '.' {
+                return i + 1, data[:i], nil
+            }
+        }
+        return 0, data, bufio.ErrFinalToken
+    })
+```
+
+まず区切る設定を行います。Split()には無名関数を渡します。
+
+```go
+    words := map[string]struct{}{}
+    for scanner.Scan() {
+        word := scanner.Text()
+        capital := rune(word[0]) // runeで比較したいので変換する
+        if unicode.IsUpper(capital) || unicode.IsDigit(capital) {
+            // 一致したらキーにその単語を、値は空で設定する
+            words[word] = struct{}{}
+        }
+    }
+    if err := scanner.Err(); err != nil {
+        panic(err)
+    }
+    fmt.Printf("%d words\n\n", len(words))
+    // mapをfor range で回す
+    for word := range words {
+        fmt.Println(word)
+    }
+```
+
+最初に`words := map[string]struct{}{}`とありますが、こちらも重複をチェックするために用意しています。後ほど説明します。
+
+まず、scanner.Scan()は標準入力空白で区切って(空白以外の区切りにも出来るがデフォルトは空白)、データを空白文字で区切って 1 つのトークンとします。
+そのトークンは scanner オブジェクトの token フィールドに一時的に保持します。なのでこれを利用して、1 つ 1 つ文字を見ていけばいいだけです。
+
+`word[0]`とアクセスすると、1 文字が byte 型で返ってくるため、rune 型に変換します。
+
+rune 型に関してですが、
+コンピューターは文字を直接扱うことが出来ません。実行するときも 0 と 1 の 2 進数の機械語を用いて、実行します。
+なので "あ" という文字に対応した数字を用意して(Unicode コードポイント)、2 進数に変換しようという仕組みが必要です。
+それが Unicode といった文字コードになります。
+
+例えば、Unicode コードポイントとして 16 進数の "0041" が割り当てられた文字 "A" を扱う場合、コンピューターは以下のように処理します。
+
+1. Unicode コードポイント "0041" を 2 進数表現に変換する
+2. 2 進数表現をコンピューターが扱える形式に変換する
+
+コンピューターは、16 進数や 10 進数などの数値表現を内部的に 2 進数に変換して扱います。そのため、2 進数表現 "0000 0000 0100 0001" は、コンピューターが扱える形式であり、機械が理解できる形式です。
+
+`A -> 0041(16進数/Unicode/rune型) → 0000 0000 0100 0001(2進数)`
+
+要するに上記のような流れになります。なので Unicode は必要です。
+
+`unicode.isUpper()`と`unicode.IsDegit()`は rune を引数に取って比較が出来るので、
+
+そして条件が true であれば、以下のようになります。
+
+`words[word] = struct{}{}`
+
+まず解説すると、
+
+`words := map[string]struct{}{}`
+
+まず map のキーに string、バリューには構造体リテラルを用いて、宣言しています。
+
+まず空の構造体型として`struct{}`という型があると認識すれば OK です。そして値も一緒に構造体リテラルという形式で
+初期化を行っています。
+
+そもそも構造体リテラルというのは、初期化(宣言された変数に初めて値を代入すること)をする際に構造体型の値を一緒に設定するための方法です。
+
+そしてこれがどう重複判定に利用できるかという部分を解説していきます。
+特に今回の場合バリューにアクセスする必要が別にないのでキーだけで判断しようということです。
+これにより、map のキーの存在を調べるときにメモリ使用量が大幅に削減されます。
+
+言葉ではイメージつかないと思うのでコードで示します。
+
+```go
+    words := map[string]struct{}{}
+
+    words["key1"] = struct{}{}
+    words["key2"] = struct{}{}
+    words["key1"] = struct{}{}
+
+    fmt.Println(words)
+    // -> map[key1:{} key2:{}]
+```
+
+map のキーは重複することがありません。なので同じキー名が来ても上書きされるだけなのでその仕組みを利用しているだけです。
+`words := map[string]struct{}{}`
+
+`words[word] = struct{}{}`
+一致したらキーにその単語を、値は空で設定します。
+words という map の集合体に word というキーを設定し、バリューは空です。
+
+最後に map の集合体を for range で回して出力します。
+
+### 全体のコード
 
 ```go
 
@@ -259,45 +375,19 @@ func otherSolution() {
     words := map[string]struct{}{}
     for scanner.Scan() {
         word := scanner.Text()
-        initial := word[0]
-        if 'A' <= intial && 'Z' <= initial || '0' <= initial && '9' {
+        capital := rune(word[0]) // runeで比較したいので変換する
+        if unicode.IsUpper(capital) || unicode.IsDigit(capital) {
+        // 一致したらキーにその単語を、値は空で設定する
             words[word] = struct{}{}
         }
     }
+    if err := scanner.Err(); err != nil {
+        panic(err)
+    }
+    fmt.Printf("%d words\n\n", len(words))
+    // mapをfor range で回す
+    for word := range words {
+        fmt.Println(word)
+    }
 }
-
-
-```
-
-最初に`words := map[string]struct{}{}`とありますが、こちらも重複をチェックするために用意しています。後ほど説明します。
-
-まず、scanner.Scan()は標準入力空白で区切って(空白以外の区切りにも出来るがデフォルトは空白)、データを空白文字で区切って 1 つのトークンとします。
-そのトークンは scanner オブジェクトの token フィールドに一時的に保持します。なのでこれを利用して、1 つ 1 つ文字を見ていけばいいだけです。
-そして`initial := word[0]` こちらで単語の頭文字にアクセスします。
-
-<!-- ここに入れる -->
-
-そして条件が true であれば、以下のようになります。
-
-`words[word] = struct{}{}`
-
-まず解説すると、
-
-`words := map[string]struct{}{}`
-
-まず map のキーに string、バリューに空の構造体型 struct{}で{}とすることでその値は空と表現出来ます。
-
-こちらでも重複を判定することが出来ます。特に今回の場合バリューにアクセスする必要が別にないので
-キーだけで判断しようということです。
-これにより、map のキーの存在を調べるときにメモリ使用量が大幅に削減されるそうです。
-
-```go
-    words := map[string]struct{}{}
-
-    words["key1"] = struct{}{}
-    words["key2"] = struct{}{}
-    words["key1"] = struct{}{}
-
-    fmt.Println(words)
-    // -> map[key1:{} key2:{}]
 ```
