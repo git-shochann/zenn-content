@@ -80,7 +80,6 @@ func Solution(str string) int {
     })
     uniqueSlice := DeleteDuplicate(slice) // 重複の削除
     for _, v := range uniqueSlice {
-        // [M3 2000 sho tsuboya]
         initial := v[0:1]
     ok := CheckRegex(initial)
     if ok {
@@ -114,6 +113,9 @@ func DeleteDuplicate(strings []string) []string {
     var unique []string
     m := map[string]bool{}
     for _, v := range strings {
+        if len(word) == 0 {
+            continue
+        }
         if _, ok := m[v]; !ok {
             m[v] = true
             unique = append(unique, v)
@@ -139,7 +141,16 @@ func DeleteDuplicate(strings []string) []string {
     // -> [key1: 5, key2: 2]
 ```
 
-空白で区切られた文字列のスライスをそれぞれアクセスしていって、重複がどうかを判定します。
+```go
+    if len(word) == 0 {
+        continue
+    }
+```
+
+上記は空の文字列が含まれる場合があるので、それをスルーする記述です。
+例えば最初の文字列が空白だったり、ピリオドで終わった文章で空の文字列が入ってしまうことがあるからです。
+
+その後、区切られた文字列のスライスをそれぞれアクセスしていって、重複がどうかを判定します。
 m[v] -> m["Favorite"] とキーにアクセスし、map のバリューが true か false で判定します。
 要するに true であれば既にキーは存在しているということになります。
 このように単語分繰り返していき、重複を除いたスライスを 戻り値として返します。
@@ -150,10 +161,7 @@ func Solution(str string) int {
     slice := strings.Split(str, " ")
     uniqueSlice := DeleteDuplicate(slice) // 重複の削除
 
-    // ここまでOK
-
     for _, v := range uniqueSlice {
-        // [M3 2000 sho tsuboya]
         initial := v[0:1]
     ok := CheckRegex(initial)
     if ok {
@@ -195,13 +203,11 @@ import (
 var count int
 
 func Solution(str string) int {
-
-    slice := strings.Split(str, " ")
-    fmt.Printf("slice: %v\n", slice)
+    slice := strings.FieldsFunc(str, func(r rune) bool {
+        return unicode.IsSpace(r) || r == '.'
+    })
     uniqueSlice := DeleteDuplicate(slice) // 重複の削除
-    fmt.Printf("uniqueSlice: %v\n", uniqueSlice)
     for _, v := range uniqueSlice {
-        // [M3 2000 sho tsuboya]
         initial := v[0:1]
         ok := CheckRegex(initial)
         if ok {
@@ -211,7 +217,6 @@ func Solution(str string) int {
     return count
 }
 
-// [M3 2000 sho tsuboya M3]
 func DeleteDuplicate(strings []string) []string {
     // m[""]false が初期化した際の型
     m := make(map[string]bool)
@@ -221,6 +226,9 @@ func DeleteDuplicate(strings []string) []string {
 
     var unique []string
     for _, v := range strings {
+        if len(word) == 0 {
+            continue
+        }
         // m[v]がtrueでなければ = まだそのキーはないということ
         if _, ok := m[v]; !ok {
             m[v] = true
@@ -272,6 +280,9 @@ string.Split()でも全てを読み込むとなると、テキストファイル
     words := map[string]struct{}{}
     for scanner.Scan() {
         word := scanner.Text()
+        if len(word) == 0 {
+            continue
+        }
         capital := rune(word[0]) // runeで比較したいので変換する
         if unicode.IsUpper(capital) || unicode.IsDigit(capital) {
             // 一致したらキーにその単語を、値は空で設定する
@@ -292,6 +303,15 @@ string.Split()でも全てを読み込むとなると、テキストファイル
 
 まず、scanner.Scan()は標準入力空白で区切って(空白以外の区切りにも出来るがデフォルトは空白)、データを空白文字で区切って 1 つのトークンとします。
 そのトークンは scanner オブジェクトの token フィールドに一時的に保持します。なのでこれを利用して、1 つ 1 つ文字を見ていけばいいだけです。
+
+```go
+    if len(word) == 0 {
+        continue
+    }
+```
+
+上記は空の文字列が含まれる場合があるので、それをスルーする記述です。
+例えば最初の文字列が空白だったり、ピリオドで終わった文章で空の文字列が入ってしまうことがあるからです。
 
 `word[0]`とアクセスすると、1 文字が byte 型で返ってくるため、rune 型に変換します。
 
@@ -375,6 +395,9 @@ func otherSolution() {
     words := map[string]struct{}{}
     for scanner.Scan() {
         word := scanner.Text()
+        if len(word) == 0 {
+            continue
+        }
         capital := rune(word[0]) // runeで比較したいので変換する
         if unicode.IsUpper(capital) || unicode.IsDigit(capital) {
         // 一致したらキーにその単語を、値は空で設定する
