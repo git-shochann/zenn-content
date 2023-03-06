@@ -197,7 +197,7 @@ func CheckRegex(s string) bool {
 ここで判定を行います。尚 `regex := regexp.MustCompile(`[A-Z0-9]`)` は一度のみの実行でいいので CheckRegex()外で宣言しています。
 regex.MatchString()で true であれば大文字 or 数字 としてカウントして最後に出力して終了です。
 
-## 全体のコード
+## 全体のコード(方法 1)
 
 ```go
 package main
@@ -372,7 +372,7 @@ words という map の集合体に word というキーを設定し、バリュ
 
 最後に map の集合体を for range で回して出力します。
 
-## 全体のコード
+## 全体のコード(方法 2)
 
 ```go
 
