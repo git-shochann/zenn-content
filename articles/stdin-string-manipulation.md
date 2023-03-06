@@ -18,16 +18,16 @@ Q: 文章中にアルファベット大文字または数字から始まる単�
 
 ex) input
 
+`Favorite food is yakiniku. Age is 25 years old. Favorite hobby is coding.`
+
+この問題を解く際に学んだことが沢山あったので、まとめました。
+
 ## 特に触れていること
 
 - 標準入力から文字列を読み込んで、どう扱っていくか
 - bufio パッケージ, strings パッケージの使い方
 - スライスから重複を消したいときの方法
 - Go の rune 型に関して
-
-`Favorite food is yakiniku. Age is 25 years old. Favorite hobby is coding.`
-
-この問題を解く際に学んだことが沢山あったので、まとめました。
 
 ## 最初に考えたこと
 
