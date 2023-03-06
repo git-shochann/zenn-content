@@ -1,6 +1,6 @@
 ---
 title: "Goで文字列操作のコーディング試験を解いたので細かく解説してみる"
-emoji: "😽"
+emoji: "🔥"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["go", "golang", "コーディングテスト", "leetcode", "atCoder"] # タグ名
 published: true # 公開設定
