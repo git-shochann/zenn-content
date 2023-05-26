@@ -18,7 +18,9 @@ Q: 文章中にアルファベット大文字または数字から始まる単�
 
 ex) input
 
-`Favorite food is yakiniku. Age is 25 years old. Favorite hobby is coding.`
+`Goku learned a new technique called Ultra Instinct. This technique is described as the state of "the body moving on its own", and it has two stages: the initial Ultra Instinct -Sign-, and the mastered Ultra Instinct. Goku used the mastered Ultra Instinct for the first time against Jiren in the Tournament of Power. Despite its immense power, Goku still has room for improvement and continues to train diligently.`
+
+`悟空はUltra Instinct, 日本語では「身勝手の極意」と呼ばれる新たなパワーを手に入れました。これは、思考せずに体が反射的に動くという、極めて高度な技術です。`
 
 この問題を解く際に学んだことが沢山あったので、まとめました。
 
