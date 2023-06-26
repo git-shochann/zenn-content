@@ -8,7 +8,7 @@ published: true # 公開設定
 
 ## 初めに
 
-とあるコーディング試験で以下のような問題が出ました。
+コーディング試験で以下のような問題が出ました。
 
 Q: 文章中にアルファベット大文字または数字から始まる単語が何種類あるか数えてください。
 
@@ -16,7 +16,7 @@ Q: 文章中にアルファベット大文字または数字から始まる単�
 
 入力は標準入力から取得して、最後に出力します。
 
-ex) input
+ex. input
 
 `Goku learned a new technique called Ultra Instinct. This technique is described as the state of "the body moving on its own", and it has two stages: the initial Ultra Instinct -Sign-, and the mastered Ultra Instinct. Goku used the mastered Ultra Instinct for the first time against Jiren in the Tournament of Power. Despite its immense power, Goku still has room for improvement and continues to train diligently.`
 
@@ -41,7 +41,7 @@ ex) input
 
 最初に全てのコードを提示しても分かり辛いので、main 関数から最後まで切り分けて解説します。
 
-## エントリーポイント (main 関数)
+## main関数
 
 ```go
 func main() {
