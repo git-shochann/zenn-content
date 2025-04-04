@@ -3,7 +3,7 @@ title: "技術書はPDFで管理すると幸せになれる"
 emoji: "📚"
 type: "idea"
 topics: ["技術書", "勉強", "学習", "情報収集"]
-published: true
+published: false
 ---
 
 ### 概要
