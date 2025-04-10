@@ -118,4 +118,4 @@ Identity added: /Users/sho/.ssh/personal (個人のGitHubのメールアドレ�
 Switched to personal
 ```
 
-このようなログが表示されます。
+このようなログが表示されて、切り替えることが一瞬で出来ます。
