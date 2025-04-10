@@ -13,14 +13,14 @@ published: true
 - `git config` の `user.name` と `user.email`: これはコミットの署名者情報です。
 - SSHキーはリポジトリのアクセス権限: これはリポジトリとSSH接続をして通信するために必要です。
 
-複数アカウントで楽に切り替えて、SSHキーはあっているけど、`user.name` と `user.email`が別アカウントのものだった！を回避するために記載します。
+複数アカウントで楽に切り替えて、SSH認証情報はあっているけど、`user.name` と `user.email`が別アカウントのものだった！を回避するために記載します。
 
-実際SSHキーが合っていればコミット等の操作は出来てしまいます。
+実際SSH認証情報が合っていればコミット等の操作は出来てしまいます。
 
 - ディレクトリごとに自動で`git config`を切り替えるように設定する
 - コマンドを1回入力して、SSH認証情報の切り替えを実施する
 
-上記をこの後記載します。
+を順番に解説します。
 
 ## ディレクトリごとに自動で`git config`を切り替える
 
@@ -101,7 +101,7 @@ alias personal = 'ssh-add -D && ssh-add ~/.ssh/personal && echo "Switched to per
 source ~/.zshrc
 ```
 
-## まとめ
+## 実施に動かす
 
 こちらでターミナルを使用する際に、
 `company`と入力すれば、SSH認証情報が会社用に
@@ -109,3 +109,13 @@ source ~/.zshrc
 なります。
 
 SSH認証情報の切り替え忘れが発生しても、リポジトリとはそもそも通信が出来ないので問題ないです。
+
+たとえば、`personal`と入力すると
+
+```shell
+All identities removed.
+Identity added: /Users/sho/.ssh/personal (個人のGitHubのメールアドレス)
+Switched to personal
+```
+
+このようなログが表示されます。
